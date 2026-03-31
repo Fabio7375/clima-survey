@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clima Aziendale — Survey</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{--nv:#0f1f3d;--gd:#b8973a;--gd2:#d4af6b;--gd3:#f5edd8;--wh:#fff;--g50:#f8f9fc;--g100:#f1f3f8;--g200:#e5e7eb;--g400:#9ca3af;--g500:#6b7280;--g900:#111827;--ok:#10b981;--warn:#f59e0b;--err:#ef4444}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--g50);color:var(--g900);min-height:100vh}
+.hdr{background:var(--nv);padding:13px 20px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:20}
+.hdr-badge{background:var(--gd);color:var(--nv);font-weight:700;font-size:11px;padding:3px 8px;border-radius:5px;letter-spacing:.5px}
+.hdr-title{color:#fff;font-size:13px;font-weight:600}
+.hdr-right{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.hdr-company{color:rgba(255,255,255,.8);font-size:12px;font-weight:500}
+.hdr-wave{color:var(--gd2);font-size:10px;font-weight:600;letter-spacing:.4px}
+.prog-wrap{background:var(--wh);padding:10px 20px;border-bottom:1px solid var(--g200);position:sticky;top:49px;z-index:10}
+.prog-info{display:flex;justify-content:space-between;font-size:11px;color:var(--g500);margin-bottom:6px}
+.prog-bar{height:3px;background:var(--g200);border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--nv),var(--gd));border-radius:4px;transition:width .4s ease}
+.main{max-width:580px;margin:0 auto;padding:22px 16px 48px}
+.screen{display:none;animation:fi .2s ease}
+.screen.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.card{background:var(--wh);border-radius:14px;padding:22px;margin-bottom:16px;border:1px solid var(--g200);box-shadow:0 2px 10px rgba(15,31,61,.05)}
+.intro-icon{width:60px;height:60px;background:var(--nv);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px}
+.intro h1{font-size:20px;font-weight:700;color:var(--nv);margin-bottom:10px;text-align:center}
+.intro p{font-size:13.5px;color:var(--g500);line-height:1.75;margin-bottom:12px;text-align:center}
+.wave-badge{display:inline-flex;align-items:center;gap:6px;background:var(--nv);color:var(--gd2);font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;margin-bottom:14px;letter-spacing:.3px}
+.privacy-box{background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px 14px;font-size:12.5px;color:#15803d;line-height:1.65;margin-bottom:18px;text-align:left}
+.privacy-box strong{display:block;margin-bottom:3px}
+.time-note{text-align:center;font-size:12px;color:var(--g400);margin-bottom:16px}
+.btn-start{width:100%;padding:14px;background:var(--nv);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:.2s}
+.btn-start:hover{background:#162945}
+.sec-hdr{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;padding-bottom:13px;border-bottom:1px solid var(--g100)}
+.sec-icon{width:40px;height:40px;background:var(--nv);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sec-title{font-size:14.5px;font-weight:700;color:var(--nv);margin-bottom:3px}
+.sec-desc{font-size:12px;color:var(--g500);line-height:1.5}
+.question{padding:12px 0;border-bottom:1px solid var(--g100)}
+.question:last-child{border-bottom:none}
+.q-text{font-size:13.5px;color:var(--g900);line-height:1.55;margin-bottom:10px}
+.q-neg{background:#fef3c7;color:#92400e;font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;margin-right:6px}
+.stars{display:flex;gap:5px}
+.star{flex:1;max-width:54px;height:42px;border:2px solid var(--g200);border-radius:9px;background:var(--g50);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--g400);cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;user-select:none}
+.star:hover{border-color:var(--gd);background:var(--gd3);color:var(--nv)}
+.star.sel{background:var(--nv);border-color:var(--nv);color:var(--gd2)}
+.star-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--g400);margin-top:4px}
+.val-err{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:9px 13px;font-size:12.5px;color:var(--err);margin-top:10px;display:none}
+.nav{display:flex;gap:10px;margin-top:18px}
+.btn{padding:12px 16px;border-radius:10px;border:none;font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;transition:.2s;flex:1;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-prev{background:var(--wh);color:var(--nv);border:2px solid var(--g200)}.btn-prev:hover{border-color:var(--nv)}
+.btn-next{background:var(--nv);color:#fff}.btn-next:hover{background:#162945}
+.btn-submit{background:var(--gd);color:#fff}.btn-submit:hover{background:var(--gd2)}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed}
+.ld{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.thankyou{text-align:center;padding:28px 12px}
+.ty-icon{width:64px;height:64px;background:#f0fdf4;border:2px solid #86efac;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px}
+.thankyou h2{font-size:20px;font-weight:700;color:var(--nv);margin-bottom:8px}
+.thankyou p{font-size:13.5px;color:var(--g500);line-height:1.7}
+.next-wave-box{background:var(--gd3);border:1px solid var(--gd2);border-radius:10px;padding:13px 15px;font-size:12.5px;color:#7c5e12;margin-top:16px;line-height:1.65;text-align:left}
+.next-wave-box strong{display:block;margin-bottom:3px}
+.already{text-align:center;padding:32px 16px}
+.already h2{font-size:19px;font-weight:700;color:var(--g500);margin-bottom:8px}
+.already p{font-size:13.5px;color:var(--g400);line-height:1.7}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-badge">BDZ</div>
+  <div class="hdr-title">Clima Aziendale</div>
+  <div class="hdr-right">
+    <div class="hdr-company" id="hdr-company"></div>
+    <div class="hdr-wave" id="hdr-wave"></div>
+  </div>
+</div>
+
+<div id="prog-outer" style="display:none">
+  <div class="prog-wrap">
+    <div class="prog-info"><span id="prog-label">Sezione 1</span><span id="prog-pct">0%</span></div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="main" id="main">
+
+  <!-- GIÀ COMPILATO -->
+  <div class="screen active" id="screen-done">
+    <div class="card"><div class="already">
+      <div style="font-size:44px;margin-bottom:14px">🔒</div>
+      <h2>Hai già compilato questa wave</h2>
+      <p>La tua risposta è già stata registrata.<br>Grazie per la partecipazione!</p>
+    </div></div>
+  </div>
+
+  <!-- INTRO -->
+  <div class="screen" id="screen-intro">
+    <div class="card">
+      <div class="intro">
+        <div class="intro-icon">😊</div>
+        <h1>Come stai lavorando?</h1>
+        <div id="wave-badge-slot"></div>
+        <p>Valuta ogni affermazione da <strong>1</strong> (per niente d'accordo) a <strong>5</strong> (totalmente d'accordo). Rispondi in modo spontaneo.</p>
+        <div class="privacy-box">
+          <strong>🔒 Anonimato garantito</strong>
+          I risultati vengono mostrati solo in forma aggregata, con almeno 5 risposte. Nessun dato individuale è visibile. Nessun nome, email o device ID viene raccolto.
+        </div>
+        <div class="time-note" id="time-note"></div>
+        <button class="btn-start" onclick="startSurvey()">Inizia →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- sezioni generate dinamicamente -->
+
+  <!-- GRAZIE -->
+  <div class="screen" id="screen-ty">
+    <div class="card">
+      <div class="thankyou">
+        <div class="ty-icon">✅</div>
+        <h2>Grazie!</h2>
+        <p>Le tue risposte sono state registrate in modo anonimo. I risultati saranno analizzati con il consulente di studio per migliorare il clima aziendale.</p>
+        <div id="next-wave-slot"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// CONFIGURA QUI l'URL del Google Apps Script (vedi istruzioni)
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyUSqPRk05v5CcT8PMG7aJnDceVrUa4DZT1f-9zkzh19tB7CAmSPwtqhTKi9eU-HcM/exec';
+// ══════════════════════════════════════════════════════════
+
+const WAVES = {
+  0: ['ruolo','autonomia','innovazione','team','leadership','organizzazione','benessere','sfida_potenziale'],
+  1: ['ruolo','autonomia'],
+  2: ['innovazione','team'],
+  3: ['leadership','organizzazione'],
+  4: ['benessere','sfida_potenziale']
+};
+
+const ALL_GROUPS = [
+  {id:'ruolo',title:'Chiarezza del Ruolo & Obiettivi',icon:'🎯',
+   desc:'Quanto sai cosa ci si aspetta da te e percepisci il tuo ruolo come significativo.',
+   qs:[
+    {t:'Il mio lavoro e le mie responsabilità sono chiaramente definiti.',inv:false},
+    {t:'So esattamente quali risultati mi vengono richiesti.',inv:false},
+    {t:'Conosco come il mio lavoro contribuisce agli obiettivi dell\'azienda.',inv:false},
+    {t:'Gli obiettivi vengono definiti senza che io possa contribuire.',inv:true},
+    {t:'Il mio lavoro mi permette di utilizzare le mie capacità.',inv:false},
+    {t:'Il mio lavoro rappresenta una sfida stimolante.',inv:false},
+    {t:'Sono orgoglioso/a di dire dove lavoro.',inv:false}
+  ]},
+  {id:'autonomia',title:'Autonomia & Responsabilità',icon:'⚙️',
+   desc:'Percepisci libertà operativa e opportunità di prendere decisioni.',
+   qs:[
+    {t:'Dispongo di una certa autonomia nell\'esecuzione del mio lavoro.',inv:false},
+    {t:'Posso prendere decisioni in modo autonomo quando necessario.',inv:false},
+    {t:'Solo pochi dipendenti hanno responsabilità importanti in questa azienda.',inv:true},
+    {t:'Raramente mi viene data la possibilità di gestire progetti in prima persona.',inv:true},
+    {t:'Mi sento valorizzato/a per il contributo che porto.',inv:false}
+  ]},
+  {id:'innovazione',title:'Innovazione & Apertura al Cambiamento',icon:'💡',
+   desc:'La cultura dell\'innovazione e la propensione dell\'azienda ad accogliere nuove idee.',
+   qs:[
+    {t:'La mia azienda è aperta al progresso e al cambiamento.',inv:false},
+    {t:'Le idee innovative e originali vengono incoraggiate.',inv:false},
+    {t:'Le nuove idee vengono davvero sperimentate e messe alla prova.',inv:false},
+    {t:'I miei superiori promuovono nuovi modi di fare le cose.',inv:false},
+    {t:'Qui si incoraggiano prospettive a lungo termine.',inv:false},
+    {t:'Questa azienda ha la reputazione di essere retrograda.',inv:true},
+    {t:'Ho la possibilità di proporre miglioramenti ai processi.',inv:false}
+  ]},
+  {id:'team',title:'Coesione del Team & Collaborazione',icon:'🤝',
+   desc:'La qualità delle relazioni tra colleghi, lo spirito di squadra e il supporto reciproco.',
+   qs:[
+    {t:'Nel mio reparto le persone si supportano a vicenda.',inv:false},
+    {t:'C\'è un forte spirito di squadra tra i dipendenti.',inv:false},
+    {t:'I colleghi si aiutano attivamente l\'uno con l\'altro.',inv:false},
+    {t:'C\'è un interesse reciproco tra i colleghi.',inv:false},
+    {t:'Nel mio reparto le ambizioni personali prevalgono sullo spirito di gruppo.',inv:true},
+    {t:'Vige la regola "ciascuno per sé" nel mio reparto.',inv:true},
+    {t:'Mi sento parte integrante del gruppo di lavoro.',inv:false}
+  ]},
+  {id:'leadership',title:'Qualità della Leadership & Fiducia',icon:'🌟',
+   desc:'La relazione con i superiori: equità, riconoscimento, comunicazione e fiducia.',
+   qs:[
+    {t:'I miei superiori riconoscono una buona prestazione lavorativa.',inv:false},
+    {t:'Posso parlare facilmente con i miei superiori di problemi legati al lavoro.',inv:false},
+    {t:'I miei superiori mi aiutano a valorizzare le mie capacità.',inv:false},
+    {t:'Posso contare sulla lealtà e l\'integrità dei miei superiori.',inv:false},
+    {t:'I miei superiori non fanno favoritismi.',inv:false},
+    {t:'I miei superiori tendono a scoraggiare le critiche costruttive.',inv:true},
+    {t:'Quando parlano ai dipendenti, i superiori si adeguano al loro livello.',inv:false},
+    {t:'Gli obiettivi che mi vengono assegnati sono ragionevoli e raggiungibili.',inv:false},
+    {t:'I miei superiori sono persone con cui posso confrontarmi liberamente.',inv:false}
+  ]},
+  {id:'organizzazione',title:'Efficienza Organizzativa & Processi',icon:'📊',
+   desc:'La qualità della pianificazione, la chiarezza dei processi e l\'efficienza operativa.',
+   qs:[
+    {t:'Le attività e i progetti vengono pianificati in modo efficace.',inv:false},
+    {t:'Le decisioni vengono prese tempestivamente quando necessario.',inv:false},
+    {t:'Molto tempo viene sprecato per inefficienze organizzative.',inv:true},
+    {t:'Tutto sembra sempre urgente, anche ciò che non lo è.',inv:true},
+    {t:'Regolamenti e norme sono chiari e coerenti.',inv:false},
+    {t:'Ci sono frequenti episodi di disorganizzazione.',inv:true},
+    {t:'La maggior parte del personale è puntuale e professionale.',inv:false},
+    {t:'Le informazioni importanti circolano a tutti i livelli.',inv:false}
+  ]},
+  {id:'benessere',title:'Benessere & Sostenibilità del Lavoro',icon:'💚',
+   desc:'Il livello di stress percepito, l\'equilibrio vita-lavoro e la sostenibilità del carico.',
+   qs:[
+    {t:'Lavorare in questa azienda è eccessivamente stressante.',inv:true},
+    {t:'La pressione per mantenere certi ritmi è spesso insostenibile.',inv:true},
+    {t:'Capita di preoccuparmi per problemi di lavoro anche fuori dall\'orario.',inv:true},
+    {t:'Non si riesce mai ad avere un momento di pausa.',inv:true},
+    {t:'L\'azienda si preoccupa concretamente per il benessere dei dipendenti.',inv:false},
+    {t:'Riesco a mantenere un buon equilibrio vita-lavoro.',inv:false},
+    {t:'L\'azienda facilita l\'inserimento di nuovi colleghi.',inv:false}
+  ]},
+  {id:'sfida_potenziale',title:'Sfida & Potenziale Espresso',icon:'⚡',
+   desc:'Il rapporto tra carico percepito e risorse disponibili. Base per il calcolo Flow/Stress/Comfort.',
+   qs:[
+    {t:'Il mio carico di lavoro è superiore a quello che riesco a gestire bene.',inv:false},
+    {t:'Le mie competenze vengono pienamente valorizzate nel mio ruolo.',inv:false},
+    {t:'A fine giornata mi sento spesso esaurito/a emotivamente.',inv:false},
+    {t:'Sono entusiasta delle sfide che il mio lavoro mi propone.',inv:false},
+    {t:'Sento che potrei dare molto di più se me ne fosse data l\'opportunità.',inv:false},
+    {t:'Penso spesso di cercare un altro lavoro o cambiare azienda.',inv:false}
+  ]}
+];
+
+// ─── PARAMS ──────────────────────────────────────────────
+const p    = new URLSearchParams(location.search);
+const SID  = p.get('sid')  || 'default';
+const AID  = p.get('aid')  || 'default';
+const DEPT = p.get('dept') || '';
+const WAVE = parseInt(p.get('wave') || '0');
+const NAME = p.get('name') ? decodeURIComponent(p.get('name')) : '';
+const ACTIVE_IDS    = WAVES[WAVE] || WAVES[0];
+const ACTIVE_GROUPS = ALL_GROUPS.filter(g => ACTIVE_IDS.includes(g.id));
+const LS_KEY = `clima_${SID}_${AID}_${DEPT}_w${WAVE}`;
+
+let step = 0, answers = {};
+
+// ─── INIT ─────────────────────────────────────────────────
+document.getElementById('hdr-company').textContent = NAME;
+if(WAVE > 0)
+  document.getElementById('hdr-wave').textContent = `WAVE ${WAVE}/4`;
+
+if(WAVE > 0){
+  const titles = ACTIVE_GROUPS.map(g => g.title.split(' &')[0]).join(' + ');
+  document.getElementById('wave-badge-slot').innerHTML =
+    `<div style="text-align:center;margin-bottom:12px">
+       <span class="wave-badge">📅 Wave ${WAVE} di 4 — ${titles}</span>
+     </div>`;
+}
+
+const mins = ACTIVE_GROUPS.length <= 2 ? '2–3' : ACTIVE_GROUPS.length <= 4 ? '4–5' : '8–10';
+document.getElementById('time-note').textContent =
+  `⏱ Tempo stimato: ${mins} min · ${ACTIVE_GROUPS.length} sezione${ACTIVE_GROUPS.length>1?'i':''} · Scala 1–5`;
+
+if(localStorage.getItem(LS_KEY)){
+  showOnly('screen-done');
+} else {
+  buildSections();
+  showOnly('screen-intro');
+}
+
+// ─── BUILD SECTIONS ───────────────────────────────────────
+function buildSections(){
+  const main  = document.getElementById('main');
+  const tySc  = document.getElementById('screen-ty');
+  ACTIVE_GROUPS.forEach((g, gi) => {
+    const isLast = gi === ACTIVE_GROUPS.length - 1;
+    const div = document.createElement('div');
+    div.className = 'screen';
+    div.id = `screen-${gi}`;
+    div.innerHTML = `
+      <div class="card">
+        <div class="sec-hdr">
+          <div class="sec-icon">${g.icon}</div>
+          <div><div class="sec-title">${g.title}</div><div class="sec-desc">${g.desc}</div></div>
+        </div>
+        ${g.qs.map((q,qi) => {
+          const key = `${g.id}_${qi}`;
+          return `<div class="question" id="qwrap-${key}">
+            <div class="q-text">${q.inv?'<span class="q-neg">⚠ neg.</span>':''}${q.t}</div>
+            <div class="stars" id="stars-${key}">
+              ${[1,2,3,4,5].map(n=>`<div class="star" onclick="setAns('${key}',${n})">${n}</div>`).join('')}
+            </div>
+            <div class="star-labels"><span>Per niente d'accordo</span><span>Totalmente d'accordo</span></div>
+          </div>`;
+        }).join('')}
+        <div class="val-err" id="err-${gi}">⚠ Rispondi a tutte le domande prima di continuare.</div>
+      </div>
+      <div class="nav">
+        <button class="btn btn-prev" onclick="goStep(${gi-1})">← Indietro</button>
+        ${isLast
+          ? `<button class="btn btn-submit" id="btn-submit" onclick="submit()">Invia le risposte →</button>`
+          : `<button class="btn btn-next" onclick="goStep(${gi+1})">Avanti →</button>`}
+      </div>`;
+    main.insertBefore(div, tySc);
+  });
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────
+function showOnly(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+}
+function startSurvey(){
+  document.getElementById('prog-outer').style.display = '';
+  goStep(0);
+}
+function goStep(s){
+  if(s > step && !validateStep(step)) return;
+  step = s;
+  if(s < 0){ showOnly('screen-intro'); document.getElementById('prog-outer').style.display='none'; return; }
+  showOnly(`screen-${s}`);
+  const pct = Math.round(((s+1)/ACTIVE_GROUPS.length)*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-label').textContent = `Sezione ${s+1} di ${ACTIVE_GROUPS.length}`;
+  document.getElementById('prog-pct').textContent = pct+'%';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function validateStep(s){
+  const g = ACTIVE_GROUPS[s]; if(!g) return true;
+  const missing = g.qs.some((_,qi) => !answers[`${g.id}_${qi}`]);
+  document.getElementById(`err-${s}`).style.display = missing ? 'block' : 'none';
+  if(missing) g.qs.forEach((_,qi)=>{
+    const key=`${g.id}_${qi}`;
+    document.getElementById(`qwrap-${key}`).style.background = answers[key]?'':'#fef2f2';
+  });
+  return !missing;
+}
+function setAns(key, val){
+  answers[key] = val;
+  document.getElementById(`stars-${key}`)?.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('sel',i<val));
+  document.getElementById(`qwrap-${key}`).style.background = '';
+}
+
+// ─── SUBMIT ───────────────────────────────────────────────
+async function submit(){
+  if(!validateStep(ACTIVE_GROUPS.length-1)) return;
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="ld"></span> Invio...';
+
+  const payload = { survey_id:SID, azienda_id:AID, dept:DEPT, wave:WAVE,
+                    timestamp:new Date().toISOString(), risposte:JSON.stringify(answers) };
+  try {
+    await fetch(GAS_URL, { method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    localStorage.setItem(LS_KEY, '1');
+    document.getElementById('prog-outer').style.display = 'none';
+    if(WAVE > 0 && WAVE < 4){
+      const nxt = WAVES[WAVE+1].map(id=>ALL_GROUPS.find(g=>g.id===id)?.title.split(' &')[0]).join(' e ');
+      document.getElementById('next-wave-slot').innerHTML =
+        `<div class="next-wave-box"><strong>📅 Prossima Wave ${WAVE+1}</strong>
+         Riceverai il link per la sezione su: <strong>${nxt}</strong></div>`;
+    }
+    showOnly('screen-ty');
+    window.scrollTo({top:0,behavior:'smooth'});
+  } catch(e){
+    btn.disabled = false; btn.innerHTML = 'Invia le risposte →';
+    alert('Errore di rete. Riprova.');
+  }
+}
+</script>
+</body>
+</html>
