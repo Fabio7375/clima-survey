@@ -301,6 +301,11 @@ const mins = ACTIVE_GROUPS.length <= 2 ? '2–3' : ACTIVE_GROUPS.length <= 4 ? '
 document.getElementById('time-note').textContent =
   `⏱ Tempo stimato: ${mins} min · ${ACTIVE_GROUPS.length} sezione${ACTIVE_GROUPS.length>1?'i':''} · Scala 1–5`;
 
+// ?reset=1 → cancella il blocco per questa combinazione (solo per test consulente)
+if(p.get('reset') === '1'){
+  localStorage.removeItem(LS_KEY);
+}
+
 if(localStorage.getItem(LS_KEY)){
   showOnly('screen-done');
 } else {
