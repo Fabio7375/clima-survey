@@ -61,6 +61,11 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--g50);color:
 .thankyou p{font-size:13.5px;color:var(--g500);line-height:1.7}
 .next-wave-box{background:var(--gd3);border:1px solid var(--gd2);border-radius:10px;padding:13px 15px;font-size:12.5px;color:#7c5e12;margin-top:16px;line-height:1.65;text-align:left}
 .next-wave-box strong{display:block;margin-bottom:3px}
+.aperta{padding:13px 0;border-bottom:1px solid var(--g100)}
+.aperta:last-child{border-bottom:none}
+.aperta .q-text{font-size:13.5px;color:var(--g900);line-height:1.55;margin-bottom:8px}
+.aperta textarea{width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:9px;font-family:inherit;font-size:13px;color:var(--g900);resize:vertical;min-height:72px;outline:none;transition:.2s;background:var(--g50)}
+.aperta textarea:focus{border-color:var(--nv);background:var(--wh)}
 .already{text-align:center;padding:32px 16px}
 .already h2{font-size:19px;font-weight:700;color:var(--g500);margin-bottom:8px}
 .already p{font-size:13.5px;color:var(--g400);line-height:1.7}
@@ -116,6 +121,38 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--g50);color:
   <!-- sezioni generate dinamicamente -->
 
   <!-- GRAZIE -->
+  <!-- DOMANDE APERTE (wave 4 o wave 0) — tutte facoltative -->
+  <div class="screen" id="screen-aperte">
+    <div class="card">
+      <div class="sec-hdr">
+        <div class="sec-icon">💬</div>
+        <div>
+          <div class="sec-title">Vuoi aggiungere qualcosa?</div>
+          <div class="sec-desc">Sezione completamente facoltativa. Puoi rispondere a una, tutte o nessuna delle domande qui sotto.</div>
+        </div>
+      </div>
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:9px;padding:10px 13px;font-size:12px;color:#15803d;margin-bottom:14px">
+        ✅ Hai già completato il questionario. Queste domande sono opzionali — puoi inviarle vuote.
+      </div>
+      <div class="aperta">
+        <div class="q-text" style="font-weight:600">Hai un suggerimento o un'idea per migliorare il lavoro in azienda? <span style="font-size:11px;color:var(--g400);font-weight:400">(facoltativo)</span></div>
+        <textarea id="ap-0" placeholder="Es. migliorare la comunicazione, organizzare meglio le riunioni, avere più autonomia..."></textarea>
+      </div>
+      <div class="aperta">
+        <div class="q-text" style="font-weight:600">Cosa ti dà più soddisfazione nel tuo lavoro? <span style="font-size:11px;color:var(--g400);font-weight:400">(facoltativo)</span></div>
+        <textarea id="ap-1" placeholder="Es. il rapporto con i colleghi, i risultati raggiunti, la varietà dei compiti..."></textarea>
+      </div>
+      <div class="aperta">
+        <div class="q-text" style="font-weight:600">C'è altro che vorresti condividere con la direzione? <span style="font-size:11px;color:var(--g400);font-weight:400">(facoltativo)</span></div>
+        <textarea id="ap-2" placeholder="Scrivi liberamente — tutto ciò che scrivi è anonimo..."></textarea>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-prev" onclick="goStepAperte('back')">← Indietro</button>
+      <button class="btn btn-submit" id="btn-submit-aperte" onclick="submit()">Invia →</button>
+    </div>
+  </div>
+
   <div class="screen" id="screen-ty">
     <div class="card">
       <div class="thankyou">
@@ -301,7 +338,9 @@ function buildSections(){
       <div class="nav">
         <button class="btn btn-prev" onclick="goStep(${gi-1})">← Indietro</button>
         ${isLast
-          ? `<button class="btn btn-submit" id="btn-submit" onclick="submit()">Invia le risposte →</button>`
+          ? (hasAperte
+            ? `<button class="btn btn-next" onclick="goStepAperte('forward')">Avanti →</button>`
+            : `<button class="btn btn-submit" id="btn-submit" onclick="submit()">Invia le risposte →</button>`)
           : `<button class="btn btn-next" onclick="goStep(${gi+1})">Avanti →</button>`}
       </div>`;
     main.insertBefore(div, tySc);
@@ -344,6 +383,19 @@ function setAns(key, val){
   document.getElementById(`qwrap-${key}`).style.background = '';
 }
 
+// ─── APERTE ───────────────────────────────────────────────
+function goStepAperte(dir){
+  if(dir === 'forward'){
+    if(!validateStep(ACTIVE_GROUPS.length-1)) return;
+    showOnly('screen-aperte');
+    document.getElementById('prog-outer').style.display = 'none';
+    window.scrollTo({top:0,behavior:'smooth'});
+  } else {
+    document.getElementById('prog-outer').style.display = '';
+    goStep(ACTIVE_GROUPS.length-1);
+  }
+}
+
 // ─── SUBMIT ───────────────────────────────────────────────
 async function submit(){
   if(!validateStep(ACTIVE_GROUPS.length-1)) return;
@@ -351,8 +403,16 @@ async function submit(){
   btn.disabled = true;
   btn.innerHTML = '<span class="ld"></span> Invio...';
 
+  // Raccoglie risposte aperte (se wave 4 o 0)
+  const aperte = {};
+  if(WAVE === 4 || WAVE === 0){
+    aperte.ap_0 = document.getElementById('ap-0')?.value?.trim() || '';
+    aperte.ap_1 = document.getElementById('ap-1')?.value?.trim() || '';
+    aperte.ap_2 = document.getElementById('ap-2')?.value?.trim() || '';
+  }
   const payload = { survey_id:SID, azienda_id:AID, dept:DEPT, wave:WAVE,
-                    timestamp:new Date().toISOString(), risposte:JSON.stringify(answers) };
+                    timestamp:new Date().toISOString(), risposte:JSON.stringify(answers),
+                    aperte:JSON.stringify(aperte) };
   try {
     await fetch(GAS_URL, { method:'POST', mode:'no-cors',
       headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
