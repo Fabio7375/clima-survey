@@ -408,9 +408,8 @@ function goStepAperte(dir){
 // ─── SUBMIT ───────────────────────────────────────────────
 async function submit(){
   if(!validateStep(ACTIVE_GROUPS.length-1)) return;
-  const btn = document.getElementById('btn-submit');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="ld"></span> Invio...';
+  const btn = document.getElementById('btn-submit-aperte') || document.getElementById('btn-submit');
+  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="ld"></span> Invio...'; }
 
   // Raccoglie risposte aperte (se wave 4 o 0)
   const aperte = {};
@@ -436,7 +435,7 @@ async function submit(){
     showOnly('screen-ty');
     window.scrollTo({top:0,behavior:'smooth'});
   } catch(e){
-    btn.disabled = false; btn.innerHTML = 'Invia le risposte →';
+    if(btn){ btn.disabled = false; btn.innerHTML = 'Invia →'; }
     alert('Errore di rete. Riprova.');
   }
 }
