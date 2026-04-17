@@ -409,7 +409,7 @@ function goStepAperte(dir){
 // ─── SUBMIT ───────────────────────────────────────────────
 async function submit(){
   if(!validateStep(ACTIVE_GROUPS.length-1)) return;
-  const btn = document.getElementById('btn-submit');
+  const btn = document.getElementById('btn-submit') || document.getElementById('btn-submit-aperte');
   btn.disabled = true;
   btn.innerHTML = '<span class="ld"></span> Invio...';
 
