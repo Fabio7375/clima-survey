@@ -281,6 +281,7 @@ const NAME = p.get('name') ? decodeURIComponent(p.get('name')) : '';
 const ACTIVE_IDS    = WAVES[WAVE] || WAVES[0];
 const ACTIVE_GROUPS = ALL_GROUPS.filter(g => ACTIVE_IDS.includes(g.id));
 const LS_KEY = `clima_${SID}_${AID}_${DEPT}_w${WAVE}`;
+const hasAperte = (WAVE === 4 || WAVE === 0);
 
 let step = 0, answers = {};
 
